@@ -19,13 +19,27 @@ počet kamenů vyhozených, vyvedených a opuštěných
 průměrná životnost kamene v tazích """
 
 
+import random
+PLAYER_BLACK = 0
+PLAYER_WHITE = 1
+
+
+
 
 # Hra (Herní deska)
 class Game:
     def __init__(self) -> None:
         self.points = dict()
+        self.players = dict()
         for i in range(1,25):
             self.points[i] = Point()
+
+    def set_player(self, player) -> bool:
+        if not player.player_color in self.players.keys():
+            self.players[player.player_color] = player
+            return True
+        return False
+
     def display(self) -> None:
         print("\n\n\n------------- Stav hry -------------")
         for key in self.points:
@@ -33,15 +47,115 @@ class Game:
             if key in [6,12,18]:
                 print()
 
+    def init_points(self) -> None:
+        self.points[1].add_checker(Checker(PLAYER_BLACK, 1))
+        self.points[1].add_checker(Checker(PLAYER_BLACK, 2))
+
+        self.points[6].add_checker(Checker(PLAYER_WHITE, 3))
+        self.points[6].add_checker(Checker(PLAYER_WHITE, 4))
+        self.points[6].add_checker(Checker(PLAYER_WHITE, 5))
+        self.points[6].add_checker(Checker(PLAYER_WHITE, 6))
+        self.points[6].add_checker(Checker(PLAYER_WHITE, 7))
+
+        self.points[8].add_checker(Checker(PLAYER_WHITE, 8))
+        self.points[8].add_checker(Checker(PLAYER_WHITE, 9))
+        self.points[8].add_checker(Checker(PLAYER_WHITE, 10))
+
+        self.points[12].add_checker(Checker(PLAYER_BLACK, 11))
+        self.points[12].add_checker(Checker(PLAYER_BLACK, 12))
+        self.points[12].add_checker(Checker(PLAYER_BLACK, 13))
+        self.points[12].add_checker(Checker(PLAYER_BLACK, 14))
+        self.points[12].add_checker(Checker(PLAYER_BLACK, 15))
+
+        self.points[13].add_checker(Checker(PLAYER_WHITE, 16))
+        self.points[13].add_checker(Checker(PLAYER_WHITE, 17))
+        self.points[13].add_checker(Checker(PLAYER_WHITE, 18))
+        self.points[13].add_checker(Checker(PLAYER_WHITE, 19))
+        self.points[13].add_checker(Checker(PLAYER_WHITE, 20))
+
+        self.points[17].add_checker(Checker(PLAYER_BLACK, 21))
+        self.points[17].add_checker(Checker(PLAYER_BLACK, 22))
+        self.points[17].add_checker(Checker(PLAYER_BLACK, 23))
+
+        self.points[19].add_checker(Checker(PLAYER_BLACK, 24))
+        self.points[19].add_checker(Checker(PLAYER_BLACK, 25))
+        self.points[19].add_checker(Checker(PLAYER_BLACK, 26))
+        self.points[19].add_checker(Checker(PLAYER_BLACK, 27))
+        self.points[19].add_checker(Checker(PLAYER_BLACK, 28))
+
+        self.points[24].add_checker(Checker(PLAYER_WHITE, 29))
+        self.points[24].add_checker(Checker(PLAYER_WHITE, 30))
+
+    def bear_off_ready(self, player):
+        if isinstance(player, Player):
+            for key in self.points:
+                if player.player_color == PLAYER_BLACK:
+                    if key < 19 and self.points[key].owner == player.player_color:
+                        return False
+                if player.player_color == PLAYER_WHITE:
+                    if key > 6 and self.points[key].owner == player.player_color:
+                        return False
+            return True
+        return False
+
+    def toggle_bear_off(self, player_color):
+        if self.bear_off_ready(self.players[player_color]):
+            self.players[player_color].bear_off_available = True
+            print("Vyvádění kamenů aktivní")
+        else:
+            self.players[player_color].bear_off_available = False
+            print("Vyvádění kamenů neaktivní")
+
     def move(self, from_point: int, to_point: int) -> None:
         checker = self.points[from_point].remove_checker()
         if checker:
             if not self.points[to_point].add_checker(checker):
                 self.points[from_point].add_checker(checker)
+            else:
+                self.toggle_bear_off(self.points[to_point].owner)
         else:
             print('Přesun neproběhl.')
 
-
+    def find_available_points(self, owner: int, dice_numbers: list) -> list:
+        available_points = []
+        for key in self.points:
+            # Všechna dostupná pole hráče
+            if self.points[key].owner == owner:
+                # Pokud DvojKostka hodila 2 čísla
+                if len(dice_numbers) == 2:
+                    for dice_number in dice_numbers:
+                        if owner == PLAYER_BLACK:
+                            # Vyvádění kamenů
+                            if key + dice_number > 24:
+                                pass
+                            else:
+                                if (self.points[key + dice_number].owner == owner) or (self.points[key + dice_number].count_checkers() <= 1):
+                                    available_points.append(key)
+                        elif owner == PLAYER_WHITE:
+                            # Vyvádění kamenů
+                            if key - dice_number < 0:
+                                pass
+                            else:
+                                if (self.points[key - dice_number].owner == owner) or (self.points[key - dice_number].count_checkers() <= 1):
+                                    available_points.append(key)
+                # Pokud DvojKostka hodila 4 čísla
+                elif len(dice_numbers) == 4:
+                    if owner == PLAYER_BLACK:
+                        # Vyvádění kamenů
+                        if key + dice_numbers[0] > 24:
+                                pass
+                        else:
+                            if (self.points[key + dice_numbers[0]].owner == owner) or (self.points[key + dice_numbers[0]].count_checkers() <= 1):
+                                available_points.append(key)
+                    elif owner == PLAYER_WHITE:
+                        # Vyvádění kamenů
+                        if key - dice_numbers[0] < 0:
+                            pass
+                        else:
+                            if (self.points[key - dice_numbers[0]].owner == owner) or (self.points[key - dice_numbers[0]].count_checkers() <= 1):
+                                available_points.append(key)
+        return list(set(available_points))
+    
 
 # Herní kámen (s pamětí, kde se postupně nacházel)
 class Checker:
@@ -49,7 +163,7 @@ class Checker:
         self.next_checker = None
         self.id = checker_id
         self.owner = owner
-        pass
+
 
 # HerníPole (modifikovaný zásobník, lze vkládat jen kameny stejných barev)
 class Point:
@@ -75,7 +189,7 @@ class Point:
                 print('Nelze přidat, pole patří jinému hráči')
                 return False
 
-    def remove_checker(self) -> Checker:
+    def remove_checker(self):
         if self.first_checker is not None:
             checker = self.first_checker
             if checker.next_checker == None:
@@ -88,7 +202,6 @@ class Point:
         else:
             print('Nelze odebrat kámen, který neexistuje')
 
-
     def count_checkers(self) -> int:
         checker = self.first_checker
         if checker is None:
@@ -100,38 +213,47 @@ class Point:
                 count += 1
             return count
 
+
 # Dvojkostka (vrací seznam možných dvojic či čtveřic)
 class DoubleDice:
     def __init__(self) -> None:
         pass
+
+    def roll(self):
+        number1 = random.randint(1,6)
+        number2 = random.randint(1,6)
+        numbers = [number1, number2]
+        if number1 == number2:
+            numbers.append(number1)
+            numbers.append(number2)
+        return numbers
+
 
 # Bar (továrna na herní kameny, s řízenou produkcí)
 class Bar:
     def __init__(self) -> None:
         pass
 
+
 # Hráč
 class Player:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, player_color: int) -> None:
+        self.player_color = player_color
+        self.bear_off_available = False
+
 
 class ConsolePlayer(Player):
     pass
+
 
 class AIPlayer(Player):
     pass
 
 game = Game()
-
-game.points[1].add_checker(Checker("bílý", 1))
-game.points[1].add_checker(Checker("bílý", 2))
-game.points[1].add_checker(Checker("bílý", 2))
-game.points[1].add_checker(Checker("bílý", 2))
-game.points[2].add_checker(Checker("černý", 2))
+player = Player(PLAYER_BLACK)
+game.set_player(player)
+game.init_points()
 game.display()
-game.move(1,3)
-game.move(1,3)
-game.move(1,3)
-game.move(1,3)
-game.move(2,3)
-game.display()
+print(game.find_available_points(PLAYER_BLACK, [5,6]))
+#dice = DoubleDice()
+#print(dice.roll())
