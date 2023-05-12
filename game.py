@@ -88,17 +88,25 @@ class Game:
 
     def bear_off_ready(self, player):
         if isinstance(player, Player):
+            last_key = None
             for key in self.points:
                 if player.player_color == PLAYER_BLACK:
-                    if key < 19 and self.points[key].owner == player.player_color:
-                        return False
-                if player.player_color == PLAYER_WHITE:
-                    if key > 6 and self.points[key].owner == player.player_color:
-                        return False
-            return True
-        return False
+                    if self.points[key].owner == player.player_color:
+                        if key < 19:
+                            return 0
+                        else:
+                            return 25 - key
+                elif player.player_color == PLAYER_WHITE:
+                    if self.points[key].owner == player.player_color:
+                        if key > 6:
+                            return 0
+                        else:
+                            last_key = key
+            return last_key
+        else:
+            return 0
 
-    def toggle_bear_off(self, player_color):
+    def toggle_bear_off(self, player_color) -> None:
         if self.bear_off_ready(self.players[player_color]):
             self.players[player_color].bear_off_available = True
             print("Vyvádění kamenů aktivní")
@@ -118,42 +126,34 @@ class Game:
 
     def find_available_points(self, owner: int, dice_numbers: list) -> list:
         available_points = []
-        for key in self.points:
-            # Všechna dostupná pole hráče
-            if self.points[key].owner == owner:
-                # Pokud DvojKostka hodila 2 čísla
-                if len(dice_numbers) == 2:
-                    for dice_number in dice_numbers:
+        # Vyvádění kamenů
+        if self.bear_off_ready(self.players[owner]):
+            pass
+        else:
+            for key in self.points:
+                # Všechna dostupná pole hráče
+                if self.points[key].owner == owner:
+                    # Pokud DvojKostka hodila 2 čísla
+                    if len(dice_numbers) == 2:
+                        for dice_number in dice_numbers:
+                            if owner == PLAYER_BLACK:
+                                if key + dice_number <= 24:
+                                    if (self.points[key + dice_number].owner == owner) or (self.points[key + dice_number].count_checkers() <= 1):
+                                        available_points.append(key)
+                            elif owner == PLAYER_WHITE:
+                                if key - dice_number > 0:
+                                    if (self.points[key - dice_number].owner == owner) or (self.points[key - dice_number].count_checkers() <= 1):
+                                        available_points.append(key)
+                    # Pokud DvojKostka hodila 4 čísla
+                    elif len(dice_numbers) == 4:
                         if owner == PLAYER_BLACK:
-                            # Vyvádění kamenů
-                            if key + dice_number > 24:
-                                pass
-                            else:
-                                if (self.points[key + dice_number].owner == owner) or (self.points[key + dice_number].count_checkers() <= 1):
+                            if key + dice_numbers[0] <= 24:
+                                if (self.points[key + dice_numbers[0]].owner == owner) or (self.points[key + dice_numbers[0]].count_checkers() <= 1):
                                     available_points.append(key)
                         elif owner == PLAYER_WHITE:
-                            # Vyvádění kamenů
-                            if key - dice_number < 0:
-                                pass
-                            else:
-                                if (self.points[key - dice_number].owner == owner) or (self.points[key - dice_number].count_checkers() <= 1):
+                            if key - dice_numbers[0] > 0:
+                                if (self.points[key - dice_numbers[0]].owner == owner) or (self.points[key - dice_numbers[0]].count_checkers() <= 1):
                                     available_points.append(key)
-                # Pokud DvojKostka hodila 4 čísla
-                elif len(dice_numbers) == 4:
-                    if owner == PLAYER_BLACK:
-                        # Vyvádění kamenů
-                        if key + dice_numbers[0] > 24:
-                                pass
-                        else:
-                            if (self.points[key + dice_numbers[0]].owner == owner) or (self.points[key + dice_numbers[0]].count_checkers() <= 1):
-                                available_points.append(key)
-                    elif owner == PLAYER_WHITE:
-                        # Vyvádění kamenů
-                        if key - dice_numbers[0] < 0:
-                            pass
-                        else:
-                            if (self.points[key - dice_numbers[0]].owner == owner) or (self.points[key - dice_numbers[0]].count_checkers() <= 1):
-                                available_points.append(key)
         return list(set(available_points))
     
 
@@ -240,6 +240,7 @@ class Player:
     def __init__(self, player_color: int) -> None:
         self.player_color = player_color
         self.bear_off_available = False
+        self.bear_off_needed = None
 
 
 class ConsolePlayer(Player):
@@ -254,6 +255,6 @@ player = Player(PLAYER_BLACK)
 game.set_player(player)
 game.init_points()
 game.display()
-print(game.find_available_points(PLAYER_BLACK, [5,6]))
+print(game.find_available_points(player.player_color, [5,6]))
 #dice = DoubleDice()
 #print(dice.roll())
