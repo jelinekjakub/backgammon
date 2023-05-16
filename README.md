@@ -16,8 +16,8 @@ Vytvořte implementaci hry vrhcáby, která podporuje hru dvou hráčů či hru 
 - počet vyvedených kamenů
 - po výhře typ výhry
 - po ukončení se zobrazí statistika o všech kamenech ve hře (zvlášť pro bílého a černého), například:
--- počet kamenů vyhozených, vyvedených a opuštěných
--- průměrná životnost kamene v tazích
+    - počet kamenů vyhozených, vyvedených a opuštěných
+    - průměrná životnost kamene v tazích
 
 ### Nepovinná funkčnost:
 - GUI rozhraní
@@ -31,6 +31,6 @@ Vytvořte implementaci hry vrhcáby, která podporuje hru dvou hráčů či hru 
 - Bar (továrna na herní kameny, s řízenou produkcí)
 - Herní kámen (s pamětí, kde se postupně nacházel)
 - Hráč:
--- odvozené třídy:
--- KonzolovýHráč
--- AIHráč
+    - odvozené třídy:
+    - KonzolovýHráč
+    - AIHráč
