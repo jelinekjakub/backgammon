@@ -124,10 +124,22 @@ class Game:
         else:
             print('Přesun neproběhl.')
 
+    def find_available_moves(self, owner: int, dice_numbers: list, selected_point: int):
+        available_moves = []
+        if self.players[owner].bear_off_available:
+            print("Zatím nevím")
+            return available_moves
+        else:
+            if self.points[selected_point].owner == owner:
+                # 1 - 24
+                for dice_number in dice_numbers:
+                    pass
+
     def find_available_points(self, owner: int, dice_numbers: list) -> list:
         available_points = []
         # Vyvádění kamenů
-        if self.bear_off_ready(self.players[owner]):
+        last = self.bear_off_ready(self.players[owner])
+        if last:
             pass
         else:
             for key in self.points:
@@ -217,7 +229,7 @@ class Point:
 # Dvojkostka (vrací seznam možných dvojic či čtveřic)
 class DoubleDice:
     def __init__(self) -> None:
-        pass
+        self.last_rolled = None
 
     def roll(self):
         number1 = random.randint(1,6)
@@ -226,6 +238,8 @@ class DoubleDice:
         if number1 == number2:
             numbers.append(number1)
             numbers.append(number2)
+        print("Hozená čísla: ", numbers)
+        self.last_rolled = numbers
         return numbers
 
 
@@ -250,11 +264,16 @@ class ConsolePlayer(Player):
 class AIPlayer(Player):
     pass
 
+
 game = Game()
 player = Player(PLAYER_BLACK)
+dice = DoubleDice()
+
 game.set_player(player)
 game.init_points()
 game.display()
-print(game.find_available_points(player.player_color, [5,6]))
-#dice = DoubleDice()
-#print(dice.roll())
+
+print("Dostupná pole: ", game.find_available_points(player.player_color, dice.roll()))
+remaining_rolls = dice.last_rolled
+
+selected_point = input("Vyberte pole: ")
