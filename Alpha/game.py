@@ -1,10 +1,32 @@
 PLAYER_WHITE = 0
 PLAYER_BLACK = 1
 
+# Klíče
 class Keys:
     def __init__(self) -> None:
         self.primary = list(range(1,25))
         self.secondary = list(range(24, 0, -1))
+
+# Bar
+class Bar:
+    def __init__(self) -> None:
+        self.has_any = False
+        self.checkers = []
+
+    def add_checker(self, checker):
+        self.checkers.append(checker)
+        self.switch_has_any()
+
+    def remove_checker(self):
+        if self.checkers:
+            return self.checkers.pop()
+
+    def switch_has_any(self) -> None:
+        if self.checkers:
+            self.has_any = True
+        else:
+            self.has_any = False
+
 
 # Hra
 class Game:
@@ -12,11 +34,13 @@ class Game:
     def __init__(self) -> None:
         self.keys = Keys()
         self.now_playing = PLAYER_WHITE
+        self.points = dict()
         self.init_points()
+        self.bar_primary = Bar()
+        self.bar_secondary = Bar()
 
     # Inicializace polí
     def init_points(self) -> None:
-        self.points = dict()
         for i in range(1,25):
             self.points[i] = Point()
 
@@ -85,13 +109,16 @@ class Game:
         return keys
 
     # Přesun kamene z jednoho pole na jiné pole
-    def move(self, from_point: int, to_point: int) -> None:
+    def move(self, from_point: int, to_point: int) -> int:
         keys = self.keys.primary
 
         print("klice: ", keys[from_point], keys[to_point])
         checker = self.points[keys[from_point]].remove_checker()
         if checker:
             self.points[keys[to_point]].add_checker(checker)
+            return abs(from_point - to_point)
+        
+        return 0
     
     # Ulož hru (zatím nefunkční)
     def save(self):
@@ -131,7 +158,7 @@ class Game:
             valid_move = self.valid_move(point_key, dice_number)
             if valid_move:
                 moves.append(valid_move)
-        return moves
+        return list(set(moves))
             
     # Platné tahy během vyvádění kamenů
     def valid_moves_while_bear_off(self, point_key):
@@ -150,6 +177,7 @@ class Game:
                     points.append(key)
         
         return points
+
 
 # Kámen
 class Checker:
@@ -172,8 +200,17 @@ class Point:
             self.first_checker = new_checker
         # Pokud v poli již kámen je
         else:
-            new_checker.next_checker = self.first_checker # type: ignore
-            self.first_checker = new_checker
+            # Přidáváme stejnou barvu na stejnou barvu
+            if self.first_checker.color == new_checker.color:
+                new_checker.next_checker = self.first_checker # type: ignore
+                self.first_checker = new_checker
+            # Přidáváme jinou barvu
+            else:
+                if self.count_checkers() == 1:
+                    # Přesun kamene do baru
+                    TEMPORARY_LIST = self.remove_checker()
+                    self.first_checker = new_checker
+
 
     # Počet kamenů v poli
     def count_checkers(self) -> int:
