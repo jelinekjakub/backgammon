@@ -36,8 +36,10 @@ class Game:
         self.now_playing = PLAYER_WHITE
         self.points = dict()
         self.init_points()
-        self.bar_primary = Bar()
-        self.bar_secondary = Bar()
+        self.bars = {
+            0: Bar(),
+            1: Bar()
+        }
 
     # Inicializace polí
     def init_points(self) -> None:
@@ -92,6 +94,12 @@ class Game:
                     return False
         return True
     
+    # Ukončení hry
+    def quit_game(self):
+        if input("Opravdu chcete ukončit hru? y/n: ") == "y":
+            exit(0)
+        return False
+
     # Zobraz hru (textový mód)
     def display(self) -> None:
         print("------------- Stav hry -------------")
@@ -114,7 +122,11 @@ class Game:
 
         print("klice: ", keys[from_point], keys[to_point])
         checker = self.points[keys[from_point]].remove_checker()
+        # Pokud byl odebrán kámen
         if checker:
+            if self.points[keys[to_point]].first_checker:
+                if not self.points[keys[to_point]].first_checker.color == checker.color:
+                    self.bars[self.points[keys[to_point]].first_checker.color].add_checker(self.points[keys[to_point]].first_checker.color)
             self.points[keys[to_point]].add_checker(checker)
             return abs(from_point - to_point)
         
@@ -207,8 +219,6 @@ class Point:
             # Přidáváme jinou barvu
             else:
                 if self.count_checkers() == 1:
-                    # Přesun kamene do baru
-                    TEMPORARY_LIST = self.remove_checker()
                     self.first_checker = new_checker
 
 

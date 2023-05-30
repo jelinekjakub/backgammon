@@ -8,10 +8,25 @@ kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
 
 PLAYER_WHITE = 0
 PLAYER_BLACK = 1
-CHECKER_WHITE = "\033[39m●\033[0;30;43m"
-CHECKER_BLACK = "●"
-CHECKER_WHITE_ACTIVE = "\033[39m●\033[0;30;43m"
-CHECKER_BLACK_ACTIVE = "●"
+
+CHECKER_WHITE = " ◯ "
+CHECKER_BLACK = " ● "
+CHECKER_WHITE_ACTIVE = " ⚪ "
+CHECKER_BLACK_ACTIVE = " ⚫ "
+DOUBLE_DICE = "🎲🎲"
+
+def disable_utf():
+    global CHECKER_WHITE
+    global CHECKER_BLACK
+    global CHECKER_WHITE_ACTIVE
+    global CHECKER_BLACK_ACTIVE
+    global DOUBLE_DICE
+
+    CHECKER_WHITE = "\033[37m o \033[0;30;43m"
+    CHECKER_BLACK = " o "
+    CHECKER_WHITE_ACTIVE = "\033[37m o \033[0;30;43m"
+    CHECKER_BLACK_ACTIVE = " o "
+    DOUBLE_DICE = "Kostka"
 
 # ⚪⚫◯
 
@@ -22,6 +37,12 @@ class Text:
     def highlight(self, text):
         return "\033[2;33;43m"+text+"\033[0;30;43m"
     
+    def error(self, text):
+        return "\033[2;31;43m"+text+"\033[0;30;43m"
+    
+    def info(self, text):
+        return "\033[2;36;43m"+text+"\033[0;30;43m"
+    
 
 class Display():
     def __init__(self) -> None:
@@ -30,14 +51,24 @@ class Display():
         self.table.title = "Herní deska"
         self.dice = PrettyTable()
         self.dice.header = False
-        self.dice.title = "Kostka"
+        self.dice.title = DOUBLE_DICE
+        self.bar = PrettyTable()
+        self.bar.header = False
 
     def title(self) -> None:
         print(Text().highlight("Vrchcáby"))
 
+    def set_error(self, message: str) -> None:
+        self.table.title = Text().error(message)
+
+    def set_message(self, message: str) -> None:
+        self.table.title = Text().info(message)    
+
+    def reset_message(self) -> None:
+        self.table.title = "Herní deska"
+
     def game_board(self, keys, data, now_plaing, selected:list):
         height = 0
-        print("selected", selected)
         for key in keys:
             if data[key].count_checkers() > height:
                 height = data[key].count_checkers()
@@ -110,16 +141,38 @@ class Display():
             difference = difference + 2
         
         print(self.table)
+        self.table.clear()
+        self.dice.clear()
+
+    def bar_refactor(self, checkers):
+        refactored = []
+        for item in checkers:
+            if item == PLAYER_WHITE:
+                refactored.append(CHECKER_WHITE_ACTIVE)
+            else:
+                refactored.append(CHECKER_BLACK_ACTIVE)
+        return refactored
+
+                
 
     def double_dice(self, numbers):
         self.dice.add_row(numbers)
 
         print(self.dice)
 
-    def render(self, keys, data, dice_numbers, now_playing, selected=[]):
+    def bars(self, bars):
+        if bars[0].has_any or bars[1].has_any:
+            self.bar.add_row(["Bar"] + self.bar_refactor(bars[0].checkers) + self.bar_refactor(bars[1].checkers))
+            print(self.bar)
+            self.bar.clear()
+
+    def render(self, game, dice, selected=[]):
         print('\033[2J')
         print("\033[0;30;43m")
         self.title()
-        self.game_board(keys, data, now_playing, selected)
-        self.double_dice(dice_numbers)
+        self.game_board(game.keys.primary, game.points, game.now_playing, selected)
+        self.bars(game.bars)
+        self.double_dice(dice)
         print("\033[0m")
+
+        self.reset_message()
