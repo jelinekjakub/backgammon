@@ -1,3 +1,5 @@
+import json
+
 PLAYER_WHITE = 0
 PLAYER_BLACK = 1
 
@@ -10,22 +12,18 @@ class Keys:
 # Bar
 class Bar:
     def __init__(self) -> None:
-        self.has_any = False
         self.checkers = []
+        self.has_any = False
 
     def add_checker(self, checker):
         self.checkers.append(checker)
-        self.switch_has_any()
+        self.has_any = True
 
     def remove_checker(self):
-        if self.checkers:
-            return self.checkers.pop()
-
-    def switch_has_any(self) -> None:
-        if self.checkers:
-            self.has_any = True
-        else:
+        if len(self.checkers) == 1:
             self.has_any = False
+        return self.checkers.pop()
+
 
 
 # Hra
@@ -40,6 +38,8 @@ class Game:
             0: Bar(),
             1: Bar()
         }
+        self.PLAYER_WHITE = 0
+        self.PLAYER_BLACK = 1
 
     # Inicializace polí
     def init_points(self) -> None:
@@ -120,13 +120,19 @@ class Game:
     def move(self, from_point: int, to_point: int) -> int:
         keys = self.keys.primary
 
-        print("klice: ", keys[from_point], keys[to_point])
-        checker = self.points[keys[from_point]].remove_checker()
+        if from_point < 0 or from_point > 23:
+            checker = self.bars[self.now_playing].remove_checker()
+        else:
+            checker = self.points[keys[from_point]].remove_checker()
         # Pokud byl odebrán kámen
         if checker:
             if self.points[keys[to_point]].first_checker:
                 if not self.points[keys[to_point]].first_checker.color == checker.color:
-                    self.bars[self.points[keys[to_point]].first_checker.color].add_checker(self.points[keys[to_point]].first_checker.color)
+                    self.points[keys[to_point]].first_checker.point_history.append("bar")
+                    self.bars[self.points[keys[to_point]].first_checker.color].add_checker(self.points[keys[to_point]].first_checker)
+            if checker.point_history == []:
+                checker.point_history.append(from_point+1)
+            checker.point_history.append(to_point+1)
             self.points[keys[to_point]].add_checker(checker)
             return abs(from_point - to_point)
         
@@ -134,10 +140,17 @@ class Game:
     
     # Ulož hru (zatím nefunkční)
     def save(self):
-        #import json
-        #with open('result.json', 'w') as fp:
-        #    json.dump(self.points, fp)
-        pass
+        with open('result.json', 'w') as fp:
+            data = dict()
+            data["points"] = self.points
+            data["bars"] = self.bars
+            data["now_playing"] = self.now_playing
+            data_json = json.dumps(data, default=vars, indent=4)
+            fp.write(data_json)
+
+    def load(self):
+        with open('result.json', 'r') as fp:
+            self.points = json.load(fp)
 
     # Přepínač hráčů
     def switch_players(self) -> None:
@@ -171,9 +184,19 @@ class Game:
             if valid_move:
                 moves.append(valid_move)
         return list(set(moves))
-            
+    
     # Platné tahy během vyvádění kamenů
-    def valid_moves_while_bear_off(self, point_key):
+    def valid_move_bear_off(self, point_key):
+        if self.is_bearing_off():
+            pass
+
+    # Platné tahy během vyvádění kamenů
+    def valid_moves_bear_off(self, point_key):
+        if self.is_bearing_off():
+            pass
+
+    # Platné tahy během vyvádění kamenů
+    def valid_points_bear_off(self, dice_numbers):
         if self.is_bearing_off():
             pass
 
@@ -198,6 +221,7 @@ class Checker:
         self.id = id
         self.color = color
         self.next_checker = None
+        self.point_history = []
 
 # Pole
 class Point:

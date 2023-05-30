@@ -147,7 +147,7 @@ class Display():
     def bar_refactor(self, checkers):
         refactored = []
         for item in checkers:
-            if item == PLAYER_WHITE:
+            if item.color == PLAYER_WHITE:
                 refactored.append(CHECKER_WHITE_ACTIVE)
             else:
                 refactored.append(CHECKER_BLACK_ACTIVE)
