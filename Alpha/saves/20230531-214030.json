@@ -1,29 +1,35 @@
 {
     "points": {
         "1": {
-            "first_checker": {
-                "id": 2,
-                "color": 0,
-                "next_checker": {
-                    "id": 1,
-                    "color": 0,
-                    "next_checker": null,
-                    "point_history": []
-                },
-                "point_history": []
-            }
+            "first_checker": null
         },
         "2": {
             "first_checker": null
         },
         "3": {
-            "first_checker": null
+            "first_checker": {
+                "id": 2,
+                "color": 0,
+                "next_checker": null,
+                "point_history": [
+                    1,
+                    3
+                ]
+            }
         },
         "4": {
             "first_checker": null
         },
         "5": {
-            "first_checker": null
+            "first_checker": {
+                "id": 1,
+                "color": 0,
+                "next_checker": null,
+                "point_history": [
+                    1,
+                    5
+                ]
+            }
         },
         "6": {
             "first_checker": {
@@ -233,5 +239,7 @@
             "has_any": false
         }
     },
-    "now_playing": 0
+    "now_playing": 1,
+    "rounds_played": 0.5,
+    "now_running": false
 }

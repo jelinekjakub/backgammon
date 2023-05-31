@@ -1,7 +1,12 @@
 import json
+import time
+import glob
+import os
 
 PLAYER_WHITE = 0
 PLAYER_BLACK = 1
+
+MAX_SAVES = 5
 
 # Klíče
 class Keys:
@@ -40,6 +45,9 @@ class Game:
         }
         self.PLAYER_WHITE = 0
         self.PLAYER_BLACK = 1
+        self.rolled_history = []
+        self.rounds_played = 0
+        self.reset_active_saves()
 
     # Inicializace polí
     def init_points(self) -> None:
@@ -115,7 +123,7 @@ class Game:
         else:
             keys = self.keys.secondary
         return keys
-
+    
     # Přesun kamene z jednoho pole na jiné pole
     def move(self, from_point: int, to_point: int) -> int:
         keys = self.keys.primary
@@ -138,17 +146,58 @@ class Game:
         
         return 0
     
-    # Ulož hru (zatím nefunkční)
+    # Pole SAVEů
+    def list_saves(self) -> list:
+        return glob.glob("saves/????????-??????.json")
+    
+    # Z aktivní SAVŮ, které nejsou už aktivní udělá neaktivní
+    def reset_active_saves(self):
+        if os.path.isdir("saves"):
+            for file in self.list_saves():
+                with open(file, 'r') as fp:
+                    data = json.load(fp)
+                    data["now_running"] = False
+                with open(file, 'w') as fp:
+                    fp.write(json.dumps(data, default=vars, indent=4))
+
+    # Pokud savy přesahují limit, nejstarší odstraní
+    def clear_saves(self):
+        saves = self.list_saves()
+        if len(saves) >= MAX_SAVES:
+            sorted_saves = sorted(saves, reverse=True)
+            for save in sorted_saves[MAX_SAVES:]:
+                os.remove(save)
+
+    # Ulož hru
     def save(self):
-        with open('result.json', 'w') as fp:
+        if not os.path.isdir("saves"):
+            os.mkdir("saves")
+            
+        saves = self.list_saves()
+        for file in saves:
+            remove = False
+            with open(file, 'r') as fp:
+                data = json.load(fp)
+                if data["now_running"] == True:
+                    remove = True
+            if remove:
+                os.remove(file)
+
+        timestr = time.strftime("%Y%m%d-%H%M%S")
+        with open(f'saves/{timestr}.json', 'w+') as fp:
             data = dict()
             data["points"] = self.points
             data["bars"] = self.bars
             data["now_playing"] = self.now_playing
+            data["rounds_played"] = self.rounds_played
+            data["now_running"] = True
             data_json = json.dumps(data, default=vars, indent=4)
             fp.write(data_json)
 
-    def load(self):
+        self.clear_saves()
+
+    # Načtení hry
+    def load(self, save_path):
         with open('result.json', 'r') as fp:
             self.points = json.load(fp)
 
@@ -158,6 +207,8 @@ class Game:
             self.now_playing = PLAYER_WHITE
         else:
             self.now_playing = PLAYER_BLACK
+        
+        self.rounds_played += 0.5
     
     # Platný tah
     def valid_move(self, point_key, dice_number):
@@ -245,7 +296,6 @@ class Point:
                 if self.count_checkers() == 1:
                     self.first_checker = new_checker
 
-
     # Počet kamenů v poli
     def count_checkers(self) -> int:
         checker = self.first_checker
@@ -276,4 +326,3 @@ class Point:
                 checker.next_checker = None
             return checker
         return None
-

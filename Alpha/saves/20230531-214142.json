@@ -2,15 +2,13 @@
     "points": {
         "1": {
             "first_checker": {
-                "id": 2,
-                "color": 0,
-                "next_checker": {
-                    "id": 1,
-                    "color": 0,
-                    "next_checker": null,
-                    "point_history": []
-                },
-                "point_history": []
+                "id": 7,
+                "color": 1,
+                "next_checker": null,
+                "point_history": [
+                    6,
+                    1
+                ]
             }
         },
         "2": {
@@ -20,32 +18,38 @@
             "first_checker": null
         },
         "4": {
-            "first_checker": null
+            "first_checker": {
+                "id": 6,
+                "color": 1,
+                "next_checker": null,
+                "point_history": [
+                    6,
+                    4
+                ]
+            }
         },
         "5": {
-            "first_checker": null
+            "first_checker": {
+                "id": 2,
+                "color": 0,
+                "next_checker": null,
+                "point_history": [
+                    1,
+                    5
+                ]
+            }
         },
         "6": {
             "first_checker": {
-                "id": 7,
+                "id": 5,
                 "color": 1,
                 "next_checker": {
-                    "id": 6,
+                    "id": 4,
                     "color": 1,
                     "next_checker": {
-                        "id": 5,
+                        "id": 3,
                         "color": 1,
-                        "next_checker": {
-                            "id": 4,
-                            "color": 1,
-                            "next_checker": {
-                                "id": 3,
-                                "color": 1,
-                                "next_checker": null,
-                                "point_history": []
-                            },
-                            "point_history": []
-                        },
+                        "next_checker": null,
                         "point_history": []
                     },
                     "point_history": []
@@ -54,7 +58,15 @@
             }
         },
         "7": {
-            "first_checker": null
+            "first_checker": {
+                "id": 1,
+                "color": 0,
+                "next_checker": null,
+                "point_history": [
+                    1,
+                    7
+                ]
+            }
         },
         "8": {
             "first_checker": {
@@ -233,5 +245,7 @@
             "has_any": false
         }
     },
-    "now_playing": 0
+    "now_playing": 0,
+    "rounds_played": 1.0,
+    "now_running": true
 }

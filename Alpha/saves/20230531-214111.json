@@ -2,14 +2,9 @@
     "points": {
         "1": {
             "first_checker": {
-                "id": 2,
+                "id": 1,
                 "color": 0,
-                "next_checker": {
-                    "id": 1,
-                    "color": 0,
-                    "next_checker": null,
-                    "point_history": []
-                },
+                "next_checker": null,
                 "point_history": []
             }
         },
@@ -75,7 +70,16 @@
             }
         },
         "9": {
-            "first_checker": null
+            "first_checker": {
+                "id": 2,
+                "color": 0,
+                "next_checker": null,
+                "point_history": [
+                    1,
+                    4,
+                    9
+                ]
+            }
         },
         "10": {
             "first_checker": null
@@ -233,5 +237,7 @@
             "has_any": false
         }
     },
-    "now_playing": 0
+    "now_playing": 1,
+    "rounds_played": 0.5,
+    "now_running": false
 }
