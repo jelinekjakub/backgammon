@@ -1,8 +1,12 @@
 
 def save_exists():
-    import os.path
-    return os.path.isfile("result.json")
-
+    import glob
+    results = glob.glob("saves/????????-??????.json")
+    if results:
+        return True
+    else:
+        return False
+    return 
 def list_int(x, item_list) -> bool:
     try:
         x = int(x)
