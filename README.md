@@ -34,3 +34,43 @@ Vytvořte implementaci hry vrhcáby, která podporuje hru dvou hráčů či hru 
     - odvozené třídy:
     - KonzolovýHráč
     - AIHráč
+
+# Tento projekt
+## Třídy
+### Třídy game.py
+- Keys
+- Bar
+- Home(Bar)
+- Game
+- Checker
+- Point
+- Player
+- ConsolePlayer(Player)
+- AIPlayer(Player)
+### Třídy graphics.py
+- Text
+- Display
+### Třídy dice.py
+- Dice
+- DoubleDice
+
+## Návod
+1. K úspěšnému spuštění hry potřebujete soubory: *main.py*, *game.py*, *graphics.py*, *filesystem.py*, *dice.py*, *verification.py*
+2. Spustit *main.py*
+3. Výběr grafického módu zadejte *1* nebo *2*
+4. Hlavní menu
+    1. Nová hra
+        - Dále se vybere zda-li chcete hrát proti počítači nebo hru dvou hráčů.
+        - Hrajete pomocí čísel a klávesy ENTER
+        - Pro ukončení zadejte 0 a stiskněte ENTER
+        - Pro zrušení tahu pouze ENTER
+        - Hra se pokaždé uloží
+    2. Načíst hru
+        - Zobrazí se výběr dostupných savů
+        - Spustí se hra
+    3. O autorovi
+        - Zobrazí se informace o autorovi
+    4. Ukončit
+
+## Nastavení
+- Maximální počet savů lze nastavit prostřednictvím souboru config.ini ve stejné složce, pokud ve složce není, hru jste zatím nespustili, nebo soubor byl odstraněn
