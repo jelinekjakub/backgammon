@@ -6,9 +6,6 @@ import datetime
 PLAYER_WHITE = 0
 PLAYER_BLACK = 1
 
-# po výhře typ výhry
-
-# tohle seberu z historie šutru
 
 def info():
     print("Nyní na tahu:", graphics.CHECKER_WHITE_ACTIVE if game.now_playing == PLAYER_WHITE else graphics.CHECKER_BLACK_ACTIVE)
@@ -18,6 +15,7 @@ def play():
     pick1 = None
     if not game.finished():
         while pick1 != 0:
+            bar_active = False
             if game.rolled_history != []:
                 rolled = game.rolled_history
             else:
@@ -28,6 +26,7 @@ def play():
             pick2 = None
             while rolled:
                 if game.bars[game.now_playing].has_any:
+                    bar_active = True
                     if game.now_playing == PLAYER_WHITE:
                         pick1 = 0
                     else:
@@ -35,7 +34,10 @@ def play():
                 else:
                     valid_points = game.valid_points(rolled)
                     if valid_points == []:
+                        display.render(game, dice=rolled, selected=valid_points)
                         display.set_error(f"Hráč {graphics.CHECKER_WHITE_ACTIVE if game.now_playing == PLAYER_WHITE else graphics.CHECKER_BLACK_ACTIVE} nemůže hrát nemá žádné dostupné tahy, hraje další.")
+                        print(f"Hráč {graphics.CHECKER_WHITE_ACTIVE if game.now_playing == PLAYER_WHITE else graphics.CHECKER_BLACK_ACTIVE} nemůže hrát nemá žádné dostupné tahy, hraje další.")
+                        input("ENTER > ")
                         rolled = []
                         break
                     
@@ -85,7 +87,10 @@ def play():
                 
                 # Hráč nemá dostupné tahy
                 if valid_moves == []:
+                    display.render(game, dice=rolled, selected=valid_moves)
                     display.set_error(f"Hráč {graphics.CHECKER_WHITE_ACTIVE if game.now_playing == PLAYER_WHITE else graphics.CHECKER_BLACK_ACTIVE} nemůže hrát nemá žádné dostupné tahy, hraje další.")
+                    print(f"Hráč {graphics.CHECKER_WHITE_ACTIVE if game.now_playing == PLAYER_WHITE else graphics.CHECKER_BLACK_ACTIVE} nemůže hrát nemá žádné dostupné tahy, hraje další.")
+                    input("ENTER > ")
                     rolled = []
                     break
                 display.render(game, dice=rolled, selected=valid_moves)
@@ -116,7 +121,7 @@ def play():
             game.rolled_history = rolled
             game.save()
             
-            if pick1 == 0 and game.bars[game.now_playing].has_any:
+            if pick1 == 0 and bar_active == True:
                 pick1 = None
 
             if pick1 != 0:
@@ -128,10 +133,9 @@ def play():
 def game_finished():
     display.clear()
     print("Hra skončila")
-    print(graphics.Text().info("Finální statistika hry"))
-    display.stats(game.collect_checkers(), game.get_average_lifespan())
-    input()
-
+    print(graphics.Text().blue("Finální statistika hry"))
+    display.stats(game.collect_checkers(), game.get_average_lifespan(), game.victory_type())
+    input("ENTER > ")
 
 
 intro_display = graphics.Display()
@@ -159,14 +163,14 @@ while mode != "4":
         display.author()
 
         print("\nDo menu stiskem ENTER...")
-        input()
+        input("ENTER > ")
     elif mode == "2":
         display.clear()
         if not verification.save_exists():
             print(graphics.Text().error("Není dostupný žádný SAVE! Vytvořte novou hru."))
 
             print("\nDo menu stiskem ENTER...")
-            input()
+            input("ENTER > ")
         else:
             game = Game()
             save_pick = None
@@ -191,7 +195,7 @@ while mode != "4":
             display.clear()
             print("\nHra uložena")
             print("\nDo menu stiskem ENTER...")
-            input()
+            input("ENTER > ")
     else:
         game = Game()
         ai_console = None
@@ -211,6 +215,6 @@ while mode != "4":
         display.clear()
         print("\nHra uložena")
         print("\nDo menu stiskem ENTER...")
-        input()
+        input("ENTER > ")
 
 display.reset_console()

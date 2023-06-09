@@ -1,6 +1,7 @@
 from prettytable import PrettyTable
 import ctypes
 
+# Inicializace konzolových barev
 kernel32 = ctypes.windll.kernel32
 kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
 
@@ -15,6 +16,7 @@ CHECKER_WHITE_ACTIVE = " ⚪ "
 CHECKER_BLACK_ACTIVE = " ⚫ "
 DOUBLE_DICE = "🎲🎲"
 
+# Zakáže pokročilé znaky
 def disable_utf():
     global CHECKER_WHITE
     global CHECKER_BLACK
@@ -272,7 +274,7 @@ class Display():
         print(self.dice)
 
     # Zobrazí statistiku
-    def stats(self, checkers, lifespan):
+    def stats(self, checkers, lifespan, victory_type):
         checkers1 = dict()
         checkers2 = dict()
         for checker_id in checkers:
@@ -294,23 +296,30 @@ class Display():
         for checker_id in checkers2:
             home2 += checkers2[checker_id].point_history.count("home")
 
-        
-        print("\n\nBílý:")
+        print(Text().blue(f"\nTyp výhry: {victory_type}"))
+        if victory_type == 1:
+            print(Text().info("1: Jednoduchá či běžná výhra: Vítězný hráč získá 1 bod, pokud se \njeho soupeři podaří vyvést alespoň jeden kámen."))
+        elif victory_type == 2:
+            print(Text().info("2: Gammon: Vítězný hráč získá 2 body, pokud se jeho protivníkovi \nnepodaří vyvést ani jeden kámen a není splněna podmínka pro trojnásobnou výhru (Backgammon)."))
+        elif victory_type == 3:
+            print(Text().info("3: Backgammon: Nejvyšší výhru 3 body si připíše vítězný hráč, \npokud se jeho soupeři nepodaří vyvést ani jeden kámen a současně mu zůstane alespoň \njeden kámen v soupeřově vlastní ohrádce nebo na přepážce (na baru)."))
+
+        print(Text().blue("\nBílý:"))
         print(f"Kamenů opuštěných: {bar1}")
         print(f"Kamenů vyhozených: {bar2}")
         print(f"Kamenů vyvedených: {home1}")
         print(f"Průměrná životnost v tazích: {round(lifespan[0], 2)}")
-        print("\nKameny")
+        print(Text().info("Kameny bílého"))
         for checker_id in checkers1:
             print(f"ID: {checker_id if checker_id > 9 else '0' + str(checker_id)} {CHECKER_WHITE_ACTIVE if checkers1[checker_id].color == PLAYER_WHITE else CHECKER_BLACK_ACTIVE} HISTORIE POLÍ: {checkers1[checker_id].point_history}")
         
 
-        print("\nČerný:")
+        print(Text().blue("\nČerný:"))
         print(f"Kamenů opuštěných: {bar2}")
         print(f"Kamenů vyhozených: {bar1}")
         print(f"Kamenů vyvedených: {home2}")
         print(f"Průměrná životnost v tazích: {round(lifespan[1], 2)}")
-        print("\nKameny")
+        print(Text().info("Kameny černého"))
         for checker_id in checkers2:
             print(f"ID: {checker_id if checker_id > 9 else '0' + str(checker_id)} {CHECKER_WHITE_ACTIVE if checkers2[checker_id].color == PLAYER_WHITE else CHECKER_BLACK_ACTIVE} HISTORIE POLÍ: {checkers2[checker_id].point_history}")
 

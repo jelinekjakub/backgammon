@@ -6,11 +6,12 @@ import random
 import dice
 import graphics
 import time
+import filesystem
 
 PLAYER_WHITE = 0
 PLAYER_BLACK = 1
 
-MAX_SAVES = 5
+MAX_SAVES = filesystem.obtain_saves()
 
 # Klíče
 class Keys:
@@ -156,12 +157,12 @@ class Game:
         
         # Pokud byl odebrán kámen
         if checker is not None:
+            if checker.point_history == []:
+                checker.point_history.append(from_point+1)
             if self.points[keys[to_point]].first_checker:
                 if not self.points[keys[to_point]].first_checker.color == checker.color:
                     self.points[keys[to_point]].first_checker.point_history.append("bar")
                     self.bars[self.points[keys[to_point]].first_checker.color].add_checker(self.points[keys[to_point]].first_checker)
-            if checker.point_history == []:
-                checker.point_history.append(from_point+1)
             checker.point_history.append(to_point+1)
             self.points[keys[to_point]].add_checker(checker)
             return abs(from_point - to_point)
@@ -419,6 +420,40 @@ class Game:
         print("Hra může začít, stisknutím ENTER spustíte hru")
         input("ENTER > ")
 
+    # Vrací číslo charakterizující typ výhry
+    def victory_type(self):
+        winner = 0
+        for key in self.homes:
+            if len(self.homes[key].checkers) == 15:
+                winner = key
+                break
+        
+        players = [0,1]
+        players.remove(winner)
+        loser = players[-1]
+
+        # 3 Backgammon
+        if self.homes[0].has_any != self.homes[1].has_any:
+            enemy_fields = False
+            keys = self.current_keys()
+
+            for index in range(23,17,-1):
+                if self.points[keys[index]].first_checker != None:
+                    if self.points[keys[index]].first_checker.color == loser:
+                        enemy_fields = True
+            
+            if self.bars[loser].has_any or enemy_fields == True:
+                return 3
+            else:
+                return 2
+
+        # 1 Běžná výhra
+        if self.homes[0].has_any and self.homes[1].has_any:
+            return 1
+        # 2 Gammon
+
+        return 0
+
 
 # Kámen
 class Checker:
@@ -487,6 +522,7 @@ class Point:
         return None
 
 class Player:
+    # Vytvoří hráče
     def create_player(self, type):
         if type == "console":
             return ConsolePlayer()
@@ -495,18 +531,22 @@ class Player:
     
 
 class ConsolePlayer(Player):
+    # Init
     def __init__(self) -> None:
         self.type = "console"
 
+    # Hraje
     def play(self, options: list, text: str) -> str:
         result = input(text)
         return result
     
+    # Hází kostku
     def roll_single_dice(self) -> int:
         number = dice.Dice().roll()
         input("Stisknutím ENTER hodíte kostkou > ")
         return number
 
+    # Hází dvojkostku
     def roll_double_dice(self) -> list:
         number = dice.DoubleDice().roll()
         input("Stisknutím ENTER hodíte dvojkostkou > ")
@@ -514,25 +554,27 @@ class ConsolePlayer(Player):
 
 
 class AIPlayer(Player):
+    # Init
     def __init__(self) -> None:
         self.type = "ai"
 
+    # Hraje
     def play(self, options: list, text: str) -> str:
         result = random.choice(options)
         print("Prosím čekejte hráč hraje ... ")
         time.sleep(2.5)
         return result
     
+    # Hází kostku
     def roll_single_dice(self) -> int:
         number = dice.Dice().roll()
         print("Prosím čekejte hráč hází kostkou ... ")
         time.sleep(1.5)
         return number
-
+    
+    # Hází dvojkostku
     def roll_double_dice(self) -> list:
         number = dice.DoubleDice().roll()
         print("Prosím čekejte hráč hází dvojkostkou ... ")
         time.sleep(1.5)
         return number
-    
-    
